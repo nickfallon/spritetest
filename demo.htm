@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Scroller</title>
+    <style type="text/css">
+        body {
+            padding: 0px;
+            margin: 0px;
+            overflow: hidden;
+            background-color: #000000;
+           
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+
+        //code + sound - nick fallon 2016
+
+        var canvas;
+        var ctx;
+        var clock = 0;
+        var canvas_width = 0;
+        var canvas_height = 0;
+
+        var tp = performance.now();
+
+        var bg = new Image();
+        bg.src = "img/bg.jpg";
+
+        //create sprite
+        var sprites = [];
+
+        var sprite = new Sprite('img/walk-right.png', 0.8, 1.2, 310, 370);
+
+        var sprite2 = new Sprite('img/walk-right.png', 1.0, 1.8, -210, 410);
+
+        var sprite3 = new Sprite('img/walk-left.png', 1.7, 3.0, -410, 440);
+
+        window.onload = function () {
+            //setup canvas, camera, world
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext("2d");
+            window.onresize = onResizeWindow;
+            onResizeWindow();
+           
+
+            //start the loop
+            window.requestAnimFrame = (function () {
+                return window.requestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame ||
+                function (callback) {
+                    window.setTimeout(callback, 16); //fallback
+                };
+            })();
+            (function animloop() {
+                requestAnimFrame(animloop);
+                theloop();
+            })();
+        }
+
+        function theloop() {
+            //t is millis since time previous 
+            var t = performance.now() - tp;
+            tp = performance.now();
+
+            clock++;
+
+            ctx.fillStyle = "rgba(0,0,0, " + 1.0 + ")";
+
+            ctx.fillRect(0, 0, canvas_width, canvas_height);
+
+            //backround
+            ctx.drawImage(bg,
+                0,
+                0,
+                858,
+                632,
+                0,
+                0,
+                858,
+                632
+                );
+
+
+            ctx.fillStyle = "rgb(255,255,255)";
+            ctx.font = "15px Verdana";
+            ctx.fillText("NJF 2017", 10, 30);
+
+            
+            //move sprite 1
+            sprite.x = sprite.x + sprite.speed;
+            if (sprite.x > 850) {
+                sprite.x = -120;
+            }
+            //animate sprite 1
+            if (clock % 10 == 0) {
+                
+                sprite.frame = sprite.frame + 1;                
+                if (sprite.frame > 5) {
+                    sprite.frame = 0;
+                }
+            }
+
+
+
+        
+            //move sprite 2
+            sprite2.x = sprite2.x + sprite2.speed;
+            if (sprite2.x > 850) {
+                sprite2.x = -420;
+            }
+            //animate sprite 2
+            if (clock % 10 == 0) {
+
+                sprite2.frame = sprite2.frame + 1;
+                if (sprite2.frame > 5) {
+                    sprite2.frame = 0;
+                }
+            }
+
+            //move sprite 3
+            sprite3.x = sprite3.x - sprite3.speed;
+            if (sprite3.x < -620) {
+                sprite3.x = 850;
+            }
+            //animate sprite 3
+            if (clock % 10 == 0) {
+
+                sprite3.frame = sprite3.frame + 1;
+                if (sprite3.frame > 5) {
+                    sprite3.frame = 0;
+                }
+            }
+
+            sprite.render();
+
+
+            //lamppost mask
+            ctx.fillStyle = "rgb(0,0,0)";
+            ctx.fillRect(731, 360, 16, 150);
+
+            sprite2.render();
+            sprite3.render();
+
+            
+
+            //mask with border
+            ctx.fillStyle = "rgb(0,0,0)";
+            ctx.fillRect(858, 0, 300, 732);
+            ctx.fillRect(0, 572, 1000, 200);
+
+        }
+
+        function onResizeWindow()  {
+            //resize canvas to fill document
+            canvas_width = document.documentElement.clientWidth;
+            canvas_height = document.documentElement.clientHeight;
+            canvas.setAttribute("width", canvas_width);
+            canvas.setAttribute("height", canvas_height);
+
+        }
+
+        function Sprite(imgpath, scale, speed, x, y) {
+            sprites.push(this);
+            //character set bitmap
+            this.image = new Image();
+            this.image.src = imgpath;
+            //number of character columns on bitmap
+            this.charCols = 10;
+            //width of bitmap
+            this.imgwidth = 612;
+            //size of single sprite
+            this.charwidth = 102;
+            this.charheight = 148;
+            
+            this.sx = 0;
+            this.sy = 0;
+            this.offset = 0;
+
+            this.scale = scale;
+            this.speed = speed;
+
+            this.frame = 0;
+            this.x = x;
+            this.y = y;
+     
+        }
+        Sprite.renderAll = function () {
+            var len = sprites.length;
+            for (var i = 0; i < len; i++) {
+                sprites[i].render();
+            }
+        }
+        Sprite.prototype.render = function (message) {
+            
+            //ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+            ctx.drawImage(this.image,
+                            this.frame * 102,
+                            0,
+                            102,
+                            148,
+                            this.x,
+                            this.y,
+                            Math.floor(102 * this.scale),
+                            Math.floor(148 * this.scale)
+                            );
+                
+        }
+
+
+    </script>
+</body>
+</html>
